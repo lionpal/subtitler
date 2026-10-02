@@ -2,8 +2,8 @@
 
 **Subtitles made from a video's own audio, in its language or yours.**
 
-For when Plex can't find subtitles, or the English subtitles don't match the English dub. Each
-episode takes 1–2 minutes, and 95–100% of lines come out right.
+For when Plex can't find subtitles, or the English subtitles don't match the English dub. An
+episode takes 1–2 minutes and about 9 cents, and 95–100% of lines come out right.
 
 ## How it works
 
