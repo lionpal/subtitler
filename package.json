@@ -1,0 +1,23 @@
+{
+  "name": "subtitler",
+  "version": "1.0.0",
+  "description": "Subtitles made from a video's own audio, in its language or yours",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "subtitler": "src/cli/cli.ts"
+  },
+  "engines": {
+    "node": ">=23.6"
+  },
+  "scripts": {
+    "test": "node --test",
+    "typecheck": "tsc && tsc -p tsconfig.web.json --noEmit",
+    "build:web": "node scripts/build-web.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  },
+  "homepage": "https://subtitle.lol"
+}

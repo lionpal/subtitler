@@ -1,0 +1,4 @@
+node_modules/
+subtitler.log
+.env
+site/

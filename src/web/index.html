@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- This page may only connect to ElevenLabs and Google's Gemini API. The browser enforces this, so
+     no code on the page can send your keys or videos anywhere else. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src SCRIPT_SOURCES; style-src 'unsafe-inline'; img-src data:; connect-src https://api.elevenlabs.io https://generativelanguage.googleapis.com; base-uri 'none'; form-action 'none'">
+<title>subtitle.lol</title>
+<meta name="description" content="Subtitles made from a video's own audio, in its language or yours.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231d1d1f'/%3E%3Crect x='7' y='17' width='18' height='3' rx='1.5' fill='white'/%3E%3Crect x='10' y='22' width='12' height='3' rx='1.5' fill='white'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --ink: #1d1d1f; --muted: #6e6e73; --faint: #a1a1a6; --line: #e2e2e7; --paper: #ffffff; --panel: #f5f5f7;
+    --accent: #0a66c2; --accent-ink: #ffffff; --done: #1f7a3a; --error: #b3261e; --code: #f1f1f4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #f2f2f4; --muted: #a1a1a8; --faint: #6c6c73; --line: #2e2e33; --paper: #121214; --panel: #1b1b1f;
+      --accent: #5aa9ff; --accent-ink: #0b1220; --done: #5cc77a; --error: #ff8a80; --code: #222227;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 18px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 56px 16px 96px; position: relative; }
+  .github { position: absolute; top: 20px; right: 16px; display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px;
+    border: 1px solid var(--line); border-radius: 999px; color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 600; }
+  .github:hover { background: var(--panel); }
+  .github svg { width: 18px; height: 18px; fill: currentColor; }
+  a { color: var(--accent); }
+  h1 { font-size: 46px; line-height: 1.1; letter-spacing: -0.025em; margin: 0 0 10px; }
+  h2 { font-size: 24px; letter-spacing: -0.01em; margin: 64px 0 16px; }
+  h3 { font-size: 18px; margin: 24px 0 8px; }
+  p { margin: 0 0 14px; }
+  .lede { font-size: 22px; color: var(--muted); margin-bottom: 20px; }
+  .muted { color: var(--muted); }
+  .small { font-size: 15px; }
+  code, pre { font: 14px/1.6 ui-monospace, "SF Mono", Menlo, monospace; }
+  :not(pre) > code { background: var(--code); padding: 1px 5px; border-radius: 4px; }
+  pre { background: var(--code); padding: 14px 16px; border-radius: 10px; overflow-x: auto; margin: 0 0 16px; }
+
+  .tabs { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; margin: 28px 0 24px; }
+  .tabs button { white-space: nowrap; border: 0; background: transparent; color: var(--muted); padding: 9px 18px; border-radius: 9px; font: inherit; font-size: 16px; cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--paper); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,0.14); }
+
+  .tool { border: 1px solid var(--line); border-radius: 16px; padding: 28px; }
+  .tool > section + section { border-top: 1px solid var(--line); margin-top: 26px; padding-top: 26px; }
+  button.big { font: inherit; font-size: 20px; font-weight: 600; padding: 14px 26px; border-radius: 12px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+  button.go { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); min-width: 160px; }
+  button:disabled { opacity: 0.4; cursor: default; }
+
+  .file-name { font-size: 22px; font-weight: 600; margin: 18px 0 2px; word-break: break-word; }
+  .sentence { font-size: 21px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; margin-bottom: 14px; }
+  .sentence select { font: inherit; font-size: 19px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); max-width: 100%; }
+  .sentence select:disabled { opacity: 0.4; }
+  .sentence input[type=checkbox] { width: 22px; height: 22px; margin: 0; accent-color: var(--accent); }
+  .sentence label { display: inline-flex; gap: 10px; align-items: center; cursor: pointer; }
+
+  .key { display: grid; grid-template-columns: 190px 1fr; gap: 6px 14px; align-items: center; margin-bottom: 14px; }
+  .key label { font-size: 18px; display: block; }
+  .key a { font-size: 14px; }
+  pre.prompt { white-space: pre-wrap; font-size: 15px; }
+  .key input { font: inherit; font-size: 17px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); width: 100%; }
+  @media (max-width: 620px) { .key { grid-template-columns: 1fr; } h1 { font-size: 36px; } .tool { padding: 20px; } }
+  .promise { background: var(--panel); border-radius: 12px; padding: 14px 16px; font-size: 15px; color: var(--muted); }
+  .promise strong { color: var(--ink); }
+  details { margin-top: 8px; }
+  summary { cursor: pointer; color: var(--accent); }
+
+  .go-row { display: flex; flex-wrap: wrap; gap: 14px 18px; align-items: center; }
+  #estimate { font-size: 16px; color: var(--muted); }
+
+  ol.progress { list-style: none; padding: 0; margin: 22px 0 0; }
+  ol.progress li { display: grid; grid-template-columns: 30px 1fr; gap: 0 10px; padding: 8px 0; }
+  ol.progress .icon { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--line); margin-top: 2px; display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+  ol.progress .title { font-size: 19px; }
+  ol.progress .detail { grid-column: 2; font-size: 15px; color: var(--muted); }
+  ol.progress li.pending .title, ol.progress li.skipped .title { color: var(--faint); }
+  ol.progress li.working .icon { border-color: var(--accent); border-right-color: transparent; animation: spin 0.9s linear infinite; }
+  ol.progress li.done .icon { border-color: var(--done); background: var(--done); color: var(--paper); }
+  ol.progress li.done .icon::after { content: "✓"; }
+  ol.progress li.failed .icon { border-color: var(--error); background: var(--error); color: var(--paper); }
+  ol.progress li.failed .icon::after { content: "✕"; }
+  ol.progress li.failed .detail { color: var(--error); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { ol.progress li.working .icon { animation: none; } }
+
+  #results:not(:empty) { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 12px; }
+  #results a.big { text-decoration: none; display: inline-block; font-size: 18px; font-weight: 600; padding: 12px 20px; border-radius: 12px;
+    background: var(--panel); border: 1px solid var(--line); color: var(--ink); word-break: break-all; }
+  #results p { flex-basis: 100%; margin: 4px 0 0; }
+
+  ol.how { padding-left: 22px; margin: 0; }
+  ol.how li { margin-bottom: 14px; }
+  footer { margin-top: 72px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 15px; color: var(--muted); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <a class="github" href="https://github.com/lionpal/subtitler" target="_blank" rel="noreferrer" aria-label="subtitle.lol on GitHub">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    GitHub
+  </a>
+  <h1>subtitle.lol</h1>
+  <p class="lede">Subtitles made from a video's own audio, in its language or yours.</p>
+  <p>For when Plex can't find subtitles, or the English subtitles don't match the English dub. Each episode takes 1–2
+    minutes, and 95–100% of lines come out right.</p>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-browser" aria-controls="panel-browser" aria-selected="true">In your browser</button>
+    <button role="tab" id="tab-cli" aria-controls="panel-cli" aria-selected="false">On the command line</button>
+    <button role="tab" id="tab-agent" aria-controls="panel-agent" aria-selected="false">With a coding agent</button>
+  </div>
+
+  <div id="panel-browser" role="tabpanel" aria-labelledby="tab-browser">
+    <div class="tool">
+      <section>
+        <button class="big" id="choose">Choose a video</button>
+        <input id="file-input" type="file" accept="video/*,audio/*,.mkv,.webm,.mka" hidden>
+        <div id="file-info" hidden>
+          <p class="file-name" id="file-name"></p>
+          <p class="muted" id="file-details"></p>
+          <div class="sentence" id="track-row" hidden>
+            <span>Use the</span><select id="audio-track" aria-label="Audio track"></select><span>audio</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="sentence">
+          <span>Transcribe the speech with</span>
+          <select id="speech-service" aria-label="Speech to text service"></select>
+        </div>
+        <div class="sentence">
+          <label><input type="checkbox" id="translate"> and translate it into</label>
+          <select id="translate-to" aria-label="Language to translate into" disabled></select>
+          <span>using</span>
+          <select id="translator" aria-label="Translation service" disabled></select>
+        </div>
+      </section>
+
+      <section>
+        <div id="keys"></div>
+        <div class="promise">
+          <strong>Keys stay in this tab</strong>, go only to their own service, and are forgotten when you close it.
+          <details>
+            <summary>How to check</summary>
+            <p style="margin:8px 0 0">The security policy at the top of this page's source only allows connections to
+              ElevenLabs and Google, and your browser enforces it. Keys are used only in
+              <code>core/speech/elevenlabs.js</code> and <code>core/translation/gemini.js</code>. To limit a leaked key,
+              give the ElevenLabs key only Speech to Text access with a credit limit, and restrict the Gemini key to the
+              Generative Language API in the
+              <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noreferrer">Google Cloud console</a>.</p>
+          </details>
+        </div>
+      </section>
+
+      <section>
+        <div class="go-row">
+          <button class="big go" id="go" disabled>Go</button>
+          <span id="estimate"></span>
+        </div>
+        <ol class="progress" id="progress" hidden></ol>
+        <div id="results"></div>
+      </section>
+    </div>
+    <p class="muted small" style="margin-top:14px">Only the audio track is uploaded. Save the .srt next to the video
+      with the same name, and Plex, VLC and IINA load it.<!-- ONLINE ONLY --> To run it offline,
+      <a href="subtitle.lol.html" download>download subtitle.lol.html</a>.<!-- /ONLINE ONLY --></p>
+  </div>
+
+  <div id="panel-cli" role="tabpanel" aria-labelledby="tab-cli" hidden>
+    <p>The same program for a terminal, for whole folders. It needs <a href="https://nodejs.org" target="_blank" rel="noreferrer">Node</a> 23.6 or later.</p>
+    <h3>Install</h3>
+<pre>git clone https://github.com/lionpal/subtitler.git
+cd subtitler
+npm link</pre>
+    <h3>Use</h3>
+    <p class="small muted">Run it in a folder of videos and check the ones you want. Each .srt is saved next to its
+      video. The first run asks for your ElevenLabs key.</p>
+<pre>cd "/Volumes/Media/TV Shows/Frieren/Season 01"
+subtitler</pre>
+<pre># list only the files that match
+subtitler Frieren*
+
+# for videos with several audio tracks, use the Japanese one
+subtitler --audio ja
+
+# also write an English translation (asks for a Gemini key)
+subtitler --translate en
+
+# every video without subtitles, without the list
+subtitler --all
+
+# everything else
+subtitler --help</pre>
+    <p class="small muted">Keys can also come from <code>ELEVENLABS_API_KEY</code> and <code>GEMINI_API_KEY</code>.
+      Runs are logged to <code>subtitler.log</code>.</p>
+  </div>
+
+  <div id="panel-agent" role="tabpanel" aria-labelledby="tab-agent" hidden>
+    <p>Skip subtitle.lol and have a coding agent make the files with you. Paste this in:</p>
+    <pre class="prompt">i need subtitles for some videos. walk me through making .srt files from the audio, asking me whenever you need something: which videos, which audio track if there's more than one, and what language i want the subtitles in. by default use elevenlabs speech to text (it gives per-word timings) and gemini to translate, but check which providers i want and ask for my keys. send only the audio track, not the whole video. build the subtitles from the word timings, one or two lines each, breaking at pauses and full stops, shown 0.2 s before the voice, and for japanese or chinese break between phrases, not inside words. if i want them in a different language from the audio (say english subtitles for a japanese track), transcribe in the original language first, then go through the whole episode for names, places and special terms, look up the official spellings (the official release or the show's wiki), fix any the transcription misheard, show me that list, and translate using it so names stay the same across episodes. save each file as Episode 1.en.srt next to its video so plex picks it up, and keep the transcripts so i don't pay twice.</pre>
+  </div>
+
+  <h2>How it works</h2>
+  <ol class="how">
+    <li><strong>Speech to text.</strong> The audio goes to
+      <a href="https://elevenlabs.io/speech-to-text" target="_blank" rel="noreferrer">ElevenLabs Scribe</a>, which
+      gives the time of every word. An hour of audio takes under a minute and about 1,200 credits ($0.22 on the
+      Creator plan).</li>
+    <li><strong>Lines.</strong> Each subtitle has 1–2 lines, breaks at pauses and full stops, and appears 0.2 s before
+      the voice, as professional subtitles do. Japanese, Chinese and Thai break between phrases found by Google's
+      <a href="https://github.com/google/budoux" target="_blank" rel="noreferrer">BudouX</a>.</li>
+    <li><strong>Glossary, when translating.</strong> Names are where translation fails most visibly, so
+      <a href="https://ai.google.dev/gemini-api/docs" target="_blank" rel="noreferrer">Gemini</a> first lists every
+      name, place and term in the episode, looks up the official spellings online, and flags names that were
+      misheard.</li>
+    <li><strong>Translation.</strong> Gemini translates the lines in batches, each with the glossary and the lines
+      before it, and must return every line.</li>
+  </ol>
+
+  <footer>The code is on <a href="https://github.com/lionpal/subtitler" target="_blank" rel="noreferrer">GitHub</a>.
+    subtitle.lol is not affiliated with Plex, ElevenLabs, Google or any other company named here.</footer>
+</main>
+<!-- SCRIPT -->
+</body>
+</html>
